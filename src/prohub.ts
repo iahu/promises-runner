@@ -1,35 +1,35 @@
 import EventEmitter from 'events'
 
-type PromiseJob<T = unknown> = () => Promise<T>
+type PromiseTask<T = unknown> = () => Promise<T>
 
 class ProHub<T = unknown> extends EventEmitter {
-  private jobCount: number
-  private eventJobs = [] as PromiseJob<T>[]
+  private taskCount: number
+  private eventTasks = [] as PromiseTask<T>[]
   private hubSize: number
-  runningJobs = [] as PromiseJob<T>[]
+  runningTasks = [] as PromiseTask<T>[]
 
-  constructor(jobs: PromiseJob<T>[], hubSize: number) {
+  constructor(tasks: PromiseTask<T>[], hubSize: number) {
     super()
-    this.jobCount = jobs.length
-    this.eventJobs = jobs.map(this.jobMapping)
+    this.taskCount = tasks.length
+    this.eventTasks = tasks.map(this.TaskMapping)
     this.hubSize = hubSize
   }
 
-  private jobMapping = (job: PromiseJob<T>, index?: number) => {
+  private taskMapping = (task: PromiseTask<T>, index?: number) => {
     return () => {
-      const eventJobs = this.eventJobs
-      const runningJobs = this.runningJobs
-      return job().then((res) => {
-        const idx = runningJobs.findIndex(job)
-        const next = eventJobs.shift()
+      const eventTasks = this.eventTasks
+      const runningTasks = this.runningTasks
+      return task().then((res) => {
+        const idx = runningTasks.findIndex(Task)
+        const next = eventTasks.shift()
         if (next) {
-          runningJobs[idx] = next
+          runningTasks[idx] = next
         } else {
-          runningJobs.splice(idx, 1)
+          runningTasks.splice(idx, 1)
         }
         const data = { value: res, index, next: next?.(), done: !next }
         this.emit('shift', data)
-        if (runningJobs.length === 0) {
+        if (runningTasks.length === 0) {
           this.emit('done', data)
         }
         return res
@@ -38,20 +38,20 @@ class ProHub<T = unknown> extends EventEmitter {
   }
 
   async start(): Promise<void> {
-    const eventJobs = this.eventJobs
-    this.runningJobs = eventJobs.splice(0, this.hubSize)
-    const runningJobs = this.runningJobs
-    await Promise.all(runningJobs.map((j) => j()))
+    const eventTasks = this.eventTasks
+    this.runningTasks = eventTasks.splice(0, this.hubSize)
+    const runningTasks = this.runningTasks
+    await Promise.all(runningTasks.map((j) => j()))
   }
 
-  push(job: PromiseJob<T>): number {
-    this.jobCount += 1
-    return this.eventJobs.push(this.jobMapping(job, this.jobCount))
+  push(Task: PromiseTask<T>): number {
+    this.taskCount += 1
+    return this.eventTasks.push(this.taskMapping(Task, this.TaskCount))
   }
 
-  pop(): PromiseJob<T> | undefined {
-    this.jobCount -= 1
-    return this.eventJobs.pop()
+  pop(): PromiseTask<T> | undefined {
+    this.taskCount -= 1
+    return this.eventTasks.pop()
   }
 }
 

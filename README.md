@@ -1,23 +1,23 @@
 # promises-runner
 
-example code of order run promises jobs by groups. jobs in group may parallel run.
+example code of concurrently run promises tasks by groups.
 
 example:
 
 ```ts
-const createJob = (value: number) => () =>
+const createTask = (value: number) => () =>
   new Promise((resolve) => setTimeout(() => resolve(value), 1000))
 ```
 
-shift job way:
+shift task mode:
 
 ```ts
-const jobs = [1, 2, 3, 4, 5].map(createJob)
+const tasks = [1, 2, 3, 4, 5].map(createTob)
 
 console.time('prohub')
-// shfit jobs to run
-const proHub = new ProHub(jobs, 3)
-proHub.push(createJob(6))
+// shfit tasks to run
+const proHub = new ProHub(tasks, 3)
+proHub.push(createTask(6))
 proHub.on('shift', (event) => console.log(event))
 proHub.on('done', () => console.timeEnd('prohub'))
 proHub.start()
@@ -31,13 +31,13 @@ proHub.start()
 // { value: 6, index: 6, next: undefined, done: true }
 ```
 
-group order way:
+group order mode:
 
 ```ts
-const jobs = [1, 2, 3, 4, 5].map(createJob)
+const tasks = [1, 2, 3, 4, 5].map(createTask)
 
 // order to run:
-promisesThrottle(jobs, 3, console.log)
+promisesThrottle(tasks, 3, console.log)
 
 // output:
 // [ 1, 2, 3 ] 0
