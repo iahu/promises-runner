@@ -11,7 +11,7 @@ class ProHub<T = unknown> extends EventEmitter {
   constructor(tasks: PromiseTask<T>[], hubSize: number) {
     super()
     this.taskCount = tasks.length
-    this.eventTasks = tasks.map(this.TaskMapping)
+    this.eventTasks = tasks.map(this.taskMapping)
     this.hubSize = hubSize
   }
 
@@ -20,7 +20,7 @@ class ProHub<T = unknown> extends EventEmitter {
       const eventTasks = this.eventTasks
       const runningTasks = this.runningTasks
       return task().then((res) => {
-        const idx = runningTasks.findIndex(Task)
+        const idx = runningTasks.findIndex(task)
         const next = eventTasks.shift()
         if (next) {
           runningTasks[idx] = next
@@ -46,7 +46,7 @@ class ProHub<T = unknown> extends EventEmitter {
 
   push(Task: PromiseTask<T>): number {
     this.taskCount += 1
-    return this.eventTasks.push(this.taskMapping(Task, this.TaskCount))
+    return this.eventTasks.push(this.taskMapping(Task, this.taskCount))
   }
 
   pop(): PromiseTask<T> | undefined {
